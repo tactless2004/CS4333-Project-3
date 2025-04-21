@@ -1,10 +1,13 @@
 # TODO: docstring
-from http_request import http_request
+from http_request import HTTPRequest
 
-def parse_http(request: str) -> http_request:
+def parse_http_request(request: str) -> HTTPRequest:
     '''TODO: Doctstring'''
-    fields = request.split('\n')
-    request_type, request_target, http_version = fields[0].split(' ')
+    try:
+        fields = request.split('\n')
+        request_type, request_target, http_version = fields[0].split(' ')
+    except ValueError:
+        return HTTPRequest("", "", "", "")
     print(request_target)
     header = {}
     for field in fields[1:]:
@@ -14,7 +17,7 @@ def parse_http(request: str) -> http_request:
         header_field, value = field[0:i], field[i+1:].lstrip().rstrip()
         header[header_field] = value
 
-    return http_request(
+    return HTTPRequest(
         request_type,
         request_target,
         http_version,

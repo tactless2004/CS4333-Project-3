@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 
 @dataclass
-class http_request:
+class HTTPRequest:
     '''Dataclass representing a parsed http request. This class has no method members.'''
     request_type: str
     request_target: str
