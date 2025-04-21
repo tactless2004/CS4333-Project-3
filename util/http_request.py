@@ -1,5 +1,9 @@
 # pylint disable=C0103
-'''http_request module'''
+'''
+util/http_request.py
+CS4333 Project 3
+Leyton McKinney
+'''
 from dataclasses import dataclass
 
 @dataclass

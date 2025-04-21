@@ -5,9 +5,7 @@ Leyton McKinney
 '''
 import select
 from socket import socket, AF_INET as ipv4, SOCK_STREAM as connected
-from requests import parse_http_request
-from datetime import datetime
-from server_response import generate_response
+from requests import parse_request, generate_response
 
 class HTTPServer:
     '''
@@ -29,10 +27,11 @@ class HTTPServer:
             input_handler, _, _ = select.select(inputs, [], [])
             if input_handler[0] == self.server:
                 client, _ = self.server.accept()
-                request = parse_http_request(client.recv(4096).decode())
+                request = parse_request(client.recv(4096).decode())
                 client.send(generate_response(request))
                 client.close()
 
 if __name__ == "__main__":
+    # TODO: argparse, make this a cli tool
     s = HTTPServer()
     s.run()

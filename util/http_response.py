@@ -1,53 +1,8 @@
 '''
-server_response.py,
-CS4333 Project 3,
-Leyton McKinney 
+util/http_response.py
+CS4333 Project 3
+Leyton McKinney
 '''
-import os
-from http_request import HTTPRequest
-def generate_response(request: HTTPRequest) -> bytes:
-    '''
-    Generates an HTTP/1.1 compliant response for GET and HEAD requests.
-
-    :param request: http_request.HTTPRequest object
-    '''
-    # Catch all non-get requests
-    if not request.request_type == "GET":
-        return HTTPResponse(501).get()
-
-    # Reroute external request_target path to correct internal path
-    request.request_target = _fix_file_path(request.request_target)
-
-    # If requested resource DNE, 404.
-    if request.request_target == "":
-        return HTTPResponse(404).get()
-    
-    # Handles edge case where HTTP Request is so mangled that the fields
-    # cannot be adequately parsed.
-    if request.request_type == "" and request.request_target == "":
-        return HTTPResponse(400).get()
-
-    # First assume request is successful.
-    # If the resource is not found: 404, or the request_type is malformed: 400
-    # then set_message() handles this.
-    # Finally, get the bytes and return this response
-    response = HTTPResponse(200)
-    response.set_message(request.request_target)
-    print(f"{response.status_code}" +
-           f"\"{request.request_type} {request.request_target}\" {request.http_version}"
-    )
-    return response.get()
-
-def _fix_file_path(path: str):
-    if "/" in path:
-        path = path.split("/")[-1]
-    for directory, _, files in os.walk("local_html", topdown = True):
-        for file in files:
-            if path == file:
-                return f"{directory.rstrip("\\")}/{file}"
-    return ""
-
-
 code_reason_map = {
     200 : "OK",
     400 : "Bad Request",
@@ -130,9 +85,9 @@ class HTTPResponse:
             case x if x in ["jpeg", "jpg"]:
                 self.message_body = open(fd, "rb").read()
                 self.content_type = "image/jpeg"
+            # TODO: Add pdf support
             case "pdf":
                 self.content_type = "application/pdf"
             case _:
                 self.status_code = 400
                 self.reason_phrase = code_reason_map[self.status_code]
-        
