@@ -1,3 +1,8 @@
+'''
+server.py
+CS4333 Project 3
+Leyton McKinney 
+'''
 import select
 from socket import socket, AF_INET as ipv4, SOCK_STREAM as connected
 from requests import parse_http_request
@@ -21,17 +26,12 @@ class HTTPServer:
         inputs = [self.server]
         running = True
         while running:
-            try:
-                input_handler, _, _ = select.select(inputs, [], [])
-            except Exception as e:
-                print(e)
-                break
+            input_handler, _, _ = select.select(inputs, [], [])
             if input_handler[0] == self.server:
-                client, client_addr = self.server.accept()
+                client, _ = self.server.accept()
                 request = parse_http_request(client.recv(4096).decode())
                 client.send(generate_response(request))
                 client.close()
-                print(f"{client_addr[0]} - - [{datetime.now()}] \"{request.request_type} {request.request_target} {request.http_version}\"200")
 
 if __name__ == "__main__":
     s = HTTPServer()

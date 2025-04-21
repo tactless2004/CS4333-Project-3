@@ -3,12 +3,14 @@ from http_request import HTTPRequest
 
 def parse_http_request(request: str) -> HTTPRequest:
     '''TODO: Doctstring'''
+
     try:
         fields = request.split('\n')
         request_type, request_target, http_version = fields[0].split(' ')
     except ValueError:
         return HTTPRequest("", "", "", "")
-    print(request_target)
+    if request_target == "/":
+        request_target = "/image_test.html"
     header = {}
     for field in fields[1:]:
         i = _find_first_occurence(field, ":")
