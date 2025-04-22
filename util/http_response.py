@@ -5,6 +5,7 @@ CS4333 Project 3
 Leyton McKinney
 '''
 code_reason_map = {
+    -1  : "Request Currently Processing",
     200 : "OK",
     400 : "Bad Request",
     404 : "Not Found",

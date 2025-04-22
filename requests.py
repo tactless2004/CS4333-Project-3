@@ -58,22 +58,27 @@ def generate_response(request: HTTPRequest) -> bytes:
 
     :param request: util.http_request.HTTPRequest object
     '''
-    # TODO: Implement HEAD requests
-    # Catch all non-get requests
+    # Catch all non-get/head requests.
     if not request.request_type in ["GET", "HEAD"]:
-        return HTTPResponse(501).get()
+        response = HTTPResponse(501)
+        _print_request_result(request, response)
+        return response.get()
 
     # Reroute external request_target path to correct internal path
     request.request_target = _fix_file_path(request.request_target)
 
     # If requested resource DNE, 404.
     if request.request_target == "":
-        return HTTPResponse(404).get()
+        response = HTTPResponse(404)
+        _print_request_result(request, response)
+        return response.get()
 
     # Handles edge case where HTTP Request is so mangled that the fields
     # cannot be adequately parsed.
     if request.request_type == "" and request.request_target == "":
-        return HTTPResponse(400).get()
+        response = HTTPResponse(400)
+        _print_request_result(request, response)
+        return response.get()
 
     # First assume request is successful.
     # If the resource is not found: 404, or the request is malformed: 400
@@ -82,11 +87,9 @@ def generate_response(request: HTTPRequest) -> bytes:
     response = HTTPResponse(200)
     response.set_message(request.request_target)
 
+    _print_request_result(request, response)
 
-    print(f"{response.status_code} " +
-           f"\"{request.request_type} {request.request_target}\" {request.http_version}"
-    )
-    if request.request_type == "GET":
+    if not request.http_version == "" and request.request_type == "GET":
         return response.get()
     return response.head()
 
@@ -98,3 +101,8 @@ def _fix_file_path(path: str):
             if path == file:
                 return f"{directory.rstrip("\\")}/{file}"
     return ""
+
+def _print_request_result(request: HTTPRequest, response: HTTPResponse):
+    print(f"{response.status_code} " +
+           f"\"{request.request_type} {request.request_target}\" {request.http_version}"
+    )

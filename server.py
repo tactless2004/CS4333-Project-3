@@ -4,6 +4,7 @@ CS4333 Project 3
 Leyton McKinney 
 '''
 import select
+import sys
 from socket import socket, AF_INET as ipv4, SOCK_STREAM as connected
 from requests import parse_request, generate_response
 
@@ -34,6 +35,5 @@ class HTTPServer:
         return f"{self.server.getsockname()}"
 
 if __name__ == "__main__":
-    # TODO: argparse, make this a cli tool
     s = HTTPServer()
     s.run()
