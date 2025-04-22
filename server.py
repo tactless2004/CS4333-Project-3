@@ -30,6 +30,8 @@ class HTTPServer:
                 request = parse_request(client.recv(4096).decode())
                 client.send(generate_response(request))
                 client.close()
+    def __str__(self):
+        return f"{self.server.getsockname()}"
 
 if __name__ == "__main__":
     # TODO: argparse, make this a cli tool

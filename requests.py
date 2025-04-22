@@ -10,16 +10,23 @@ def parse_request(request: str) -> HTTPRequest:
     '''
     Converts an HTTP request string into a `http_request.HTTPRequest` object
     
-    :param request: Raw HTTP request string
+    :param request: Raw HTTP request string (utf-8 encoded)
     '''
 
+    # Gather all fields, if packet is malformed, return an empty HTTPRequest
+    #     generate_response() handles empty HTTPRequests as 400s
     try:
         fields = request.split('\n')
         request_type, request_target, http_version = fields[0].split(' ')
     except ValueError:
         return HTTPRequest("", "", "", "")
+
+    # Default GET response should be image_test.html
+    # Could consider making it index.html for ubiquity.
     if request_target == "/":
         request_target = "/image_test.html"
+
+    # Gather all fields. Most will be unused
     header = {}
     for field in fields[1:]:
         i = _find_first_occurence(field, ":")
@@ -37,8 +44,8 @@ def parse_request(request: str) -> HTTPRequest:
 
 
 def _find_first_occurence(x: str, target: str) -> int:
-    '''Returns the index of `x` associated with the first occurance
-    occurence of char `target`.
+    '''Returns the index of string `x` associated with the first occurance
+    occurence of char `target`. Returns -1 if `target` is not found in `x`. O(n) search.
     '''
     for i, char in enumerate(x):
         if char == target:
@@ -53,7 +60,7 @@ def generate_response(request: HTTPRequest) -> bytes:
     '''
     # TODO: Implement HEAD requests
     # Catch all non-get requests
-    if not request.request_type == "GET":
+    if not request.request_type in ["GET", "HEAD"]:
         return HTTPResponse(501).get()
 
     # Reroute external request_target path to correct internal path
@@ -69,15 +76,19 @@ def generate_response(request: HTTPRequest) -> bytes:
         return HTTPResponse(400).get()
 
     # First assume request is successful.
-    # If the resource is not found: 404, or the request_type is malformed: 400
+    # If the resource is not found: 404, or the request is malformed: 400
     # then set_message() handles this.
     # Finally, get the bytes and return this response
     response = HTTPResponse(200)
     response.set_message(request.request_target)
-    print(f"{response.status_code}" +
+
+
+    print(f"{response.status_code} " +
            f"\"{request.request_type} {request.request_target}\" {request.http_version}"
     )
-    return response.get()
+    if request.request_type == "GET":
+        return response.get()
+    return response.head()
 
 def _fix_file_path(path: str):
     if "/" in path:

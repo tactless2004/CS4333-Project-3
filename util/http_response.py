@@ -1,3 +1,4 @@
+# pylint: disable=R1732
 '''
 util/http_response.py
 CS4333 Project 3
@@ -22,9 +23,10 @@ class HTTPResponse:
         self.message_body = ""
         self.content_type = ""
         self.optional_headers = []
+
     def get(self) -> bytes:
         '''
-        Returns a 'utf-8' encoded byte stream for the http response.
+        Returns a 'utf-8' encoded byte stream for the GET HTTPResponse.
         '''
         if self.status_code in [400, 404, 501]:
             return f"HTTP/1.1 {self.status_code} {self.reason_phrase}\r\n".encode("utf-8")
@@ -49,6 +51,34 @@ class HTTPResponse:
                 "".join(self.optional_headers)
                 ).encode("utf-8") +
                 self.message_body +
+                "\r\n".encode("utf-8")
+                )
+
+    def head(self) -> bytes:
+        '''
+        Returns a 'utf-8' encoded byte stream for the HEAD HTTPResponse.
+        '''
+        if self.status_code in [400, 404, 501]:
+            return f"HTTP/1.1 {self.status_code} {self.reason_phrase}\r\n".encode("utf-8")
+        if self.content_type == "":
+            raise ValueError("content type must be defined for a successful response.")
+        if self.message_body == "":
+            raise ValueError("message body must not be empty for a successful response.")
+
+        match(self.content_type):
+            case "text/html":
+                return ("HTTP/1.1 200 OK\n" +
+                    f"Content-Length: {len(self.message_body)}\n" +
+                    f"Content-Type: {self.content_type}\n\n" +
+                    "".join(self.optional_headers)
+                ).encode("utf-8")
+
+            case "image/jpeg" | "image/gif" | "application/pdf":
+                return (("HTTP/1.1 200 OK\n" +
+                f"Content-Length: {len(self.message_body)}\n" +
+                f"Content-Type: {self.content_type}\n\n" +
+                "".join(self.optional_headers)
+                ).encode("utf-8") +
                 "\r\n".encode("utf-8")
                 )
 
