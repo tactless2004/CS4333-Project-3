@@ -42,7 +42,7 @@ class HTTPResponse:
                     f"{self.message_body}\n"
                 ).encode("utf-8")
 
-            case x if x in ["image/jpeg", "image/gif"]:
+            case "image/jpeg" | "image/gif" | "application/pdf":
                 return (("HTTP/1.1 200 OK\n" +
                 f"Content-Length: {len(self.message_body)}\n" +
                 f"Content-Type: {self.content_type}\n\n" +
@@ -82,11 +82,11 @@ class HTTPResponse:
             case "gif":
                 self.message_body = open(fd, "rb").read()
                 self.content_type = "image/gif"
-            case x if x in ["jpeg", "jpg"]:
+            case "jpeg" | "jpg":
                 self.message_body = open(fd, "rb").read()
                 self.content_type = "image/jpeg"
-            # TODO: Add pdf support
             case "pdf":
+                self.message_body = open(fd, "rb").read()
                 self.content_type = "application/pdf"
             case _:
                 self.status_code = 400
