@@ -64,14 +64,17 @@ def generate_response(request: HTTPRequest) -> bytes:
         _print_request_result(request, response)
         return response.get()
 
+    cached_request_value = request.request_target
     # Reroute external request_target path to correct internal path
     request.request_target = _fix_file_path(request.request_target)
 
     # If requested resource DNE, 404.
     if request.request_target == "":
         response = HTTPResponse(404)
+        request.request_target = cached_request_value
         _print_request_result(request, response)
         return response.get()
+
 
     # Handles edge case where HTTP Request is so mangled that the fields
     # cannot be adequately parsed.
